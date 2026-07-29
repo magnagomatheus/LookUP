@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title%}Register{%endblock%}
+
+{% block content %}
+
+    <div class="container min-vh-100 d-flex flex-column justify-content-center text-center pw-5">
+        <h2 class="mb-5 fw-bold">Register</h2>
+    
+        <form method="post" action="{{url_for('auth.register')}}">
+            <div class="mb-3">
+                <label for="email" class="form-label">E-mail:</label>
+                <input type="text" class="form-control mx-auto w-50" id="email" name="email">
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label>
+                <input type="text" class="form-control mx-auto w-50" id="name" name="name">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password:</label>
+                <input type="password" class="form-control mx-auto w-50 text-start" id="password" name="password">
+            </div>
+            <div class="mb-3">
+                <label for="cpassword" class="form-label">Confirm Your Password:</label>
+                <input type="password" class="form-control mx-auto w-50" id="cpassword" name="cpassword">
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Register</button>
+        </form>
+    </div>
+    
+{% endblock %}

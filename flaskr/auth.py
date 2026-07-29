@@ -23,11 +23,13 @@ def register():
             error = "Username is required."
         elif not password:
             error = "Password is required."
+        elif not email:
+            error = "Email is required."
         
-        if error in None:
+        if error is None:
             try:
                 db.execute(
-                    "INSERT INTO User (username, email, password) VALUES (?, ?)",
+                    "INSERT INTO User (name, email, password) VALUES (?, ?, ?)",
                     (username, email, generate_password_hash(password)),
                 )
                 db.commit()
@@ -50,8 +52,8 @@ def login():
         db=get_db()
         error = None
         user = db.execute(
-            'SELECT * FROM User WHERE email = ?', (email,).fetchone()
-        )
+            'SELECT * FROM User WHERE email = ?', (email,)
+        ).fetchone()
 
         if user is None:
             error = 'Incorrect username.'
@@ -61,7 +63,7 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user['id']
-            return redirect(url_for('core'))
+            return redirect(url_for('index'))
 
         flash(error)
 
@@ -75,8 +77,8 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = get_db().execute(
-            'SELECT * FROM user WHERE id = ?', (user_id,).fetchone()
-        )
+            'SELECT * FROM User WHERE id = ?', (user_id,)
+        ).fetchone()
 
 
 @bp.route('/logout')

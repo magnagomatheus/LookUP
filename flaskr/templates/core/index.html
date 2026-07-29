@@ -2,7 +2,30 @@
 
 {% block title%}Celest Objects Infos{%endblock%}
 
-{%block body%}
-    <p>Hello, World!!!!</p>
+{%block content%}
+
+    {% if g.user %}
+        <p>Hello, World!!!!</p>
+        gdsadsaaaaaaaaaaaaaaaaaaaaaa
+    {% else %}
+        <div class="container min-vh-100 d-flex flex-column justify-content-center text-center">
+            <h2 class="mb-5 fw-bold">Enter a address: </h2>
+            <form action="" method="POST">
+                <div class="mb-3">
+                    <label for="country" class="form-label">Country:</label>
+                    <input type="text" class="form-control mx-auto w-50" id="country">
+                </div>
+                <div class="mb-3">
+                    <label for="state" class="form-label">State:</label>
+                    <input type="text" class="form-control mx-auto w-50" id="state">
+                </div>
+                <div class="mb-3">
+                    <label for="city" class="form-label">City:</label>
+                    <input type="text" class="form-control mx-auto w-50" id="city">
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Submit</button>
+            </form>
+        </div>
+    {% endif %}
     
 {%endblock%}

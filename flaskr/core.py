@@ -6,7 +6,7 @@ bp = Blueprint('core', __name__)
 
 
 @bp.route('/', methods=('GET', 'POST'))
-def core():
+def index():
 
     #sending data
     if (request.method == "POST"):
