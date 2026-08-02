@@ -16,6 +16,7 @@ def register():
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
+        cpassword = request.form['cpassword']
         db = get_db()
         error = None
 
@@ -23,10 +24,14 @@ def register():
             error = "Username is required."
         elif not password:
             error = "Password is required."
+        elif not cpassword:
+            error = "Confirm your password is required."
         elif not email:
             error = "Email is required."
+        elif password != cpassword:
+            error = "Password is different to Password confirmation!"
         
-        if error is None:
+        if error is None and password == cpassword:
             try:
                 db.execute(
                     "INSERT INTO User (name, email, password) VALUES (?, ?, ?)",
