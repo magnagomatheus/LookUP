@@ -5,9 +5,11 @@ import requests
 import ephem
 from datetime import datetime
 import math
+import os
 
-from flaskr.db import get_db
 from flaskr.auth import login_required
+
+NO_DB = os.environ.get('NO_DB', 'false').lower() == 'true'
 
 bp = Blueprint('core', __name__)
 
@@ -20,7 +22,8 @@ bp = Blueprint('core', __name__)
 def index():
     saved_locations = []
 
-    if g.user:
+    if g.user and not NO_DB:
+        from flaskr.db import get_db
         db = get_db()
         saved_locations = db.execute(
             'SELECT * FROM SavedLocation WHERE fk_user = ? ORDER BY created_at DESC',
@@ -85,6 +88,11 @@ def index():
 @bp.route('/save-address', methods=('POST',))
 @login_required
 def saveAddress():
+    if NO_DB:
+        flash('This feature is not available in this version.')
+        return redirect(url_for('core.index'))
+
+    from flaskr.db import get_db
     country = request.form.get('country', '').strip()
     state   = request.form.get('state', '').strip()
     city    = request.form.get('city', '').strip()
@@ -127,6 +135,11 @@ def saveAddress():
 @bp.route('/delete-address/<int:loc_id>', methods=('POST',))
 @login_required
 def deleteAddress(loc_id):
+    if NO_DB:
+        flash('This feature is not available in this version.')
+        return redirect(url_for('core.index'))
+
+    from flaskr.db import get_db
     db = get_db()
     location = db.execute(
         'SELECT * FROM SavedLocation WHERE id = ? AND fk_user = ?',
@@ -150,6 +163,11 @@ def deleteAddress(loc_id):
 @bp.route('/lookup/<int:loc_id>')
 @login_required
 def lookupSaved(loc_id):
+    if NO_DB:
+        flash('This feature is not available in this version.')
+        return redirect(url_for('core.index'))
+
+    from flaskr.db import get_db
     db = get_db()
     location = db.execute(
         'SELECT * FROM SavedLocation WHERE id = ? AND fk_user = ?',

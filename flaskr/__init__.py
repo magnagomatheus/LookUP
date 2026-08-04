@@ -2,11 +2,15 @@ import os
 
 from flask import Flask
 
+# When NO_DB=true, the app runs without any database (search-only mode).
+NO_DB = os.environ.get('NO_DB', 'false').lower() == 'true'
+
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
-        SECRET_KEY='dev',
+        SECRET_KEY=os.environ.get('SECRET_KEY', 'dev'),
         DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
+        NO_DB=NO_DB,
     )
 
     if test_config is None:
@@ -16,12 +20,13 @@ def create_app(test_config=None):
 
     os.makedirs(app.instance_path, exist_ok=True)
 
-    #@app.route('/')
-    #def hello():
-    #    return 'Hello, World!'
+    if not NO_DB:
+        from . import db
+        db.init_app(app)
 
-    from . import db
-    db.init_app(app)
+    @app.context_processor
+    def inject_no_db():
+        return {'no_db': NO_DB}
 
     from . import auth
     app.register_blueprint(auth.bp)
@@ -30,5 +35,4 @@ def create_app(test_config=None):
     app.register_blueprint(core.bp)
     app.add_url_rule('/', endpoint='index')
 
-    
     return app

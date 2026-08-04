@@ -26,7 +26,7 @@
     <div class="row justify-content-center g-5">
 
         <!-- Search form (always visible) -->
-        <div class="{% if g.user and saved_locations %}col-lg-6{% else %}col-lg-8{% endif %}">
+        <div class="{% if g.user and saved_locations and not no_db %}col-lg-6{% else %}col-lg-8{% endif %}">
             <div class="search-card">
                 <h2 class="search-card-title">🔭 Search a Location</h2>
                 <form action="{{ url_for('core.index') }}" method="POST">
@@ -50,7 +50,7 @@
                     </button>
                 </form>
 
-                {% if not g.user %}
+                {% if not g.user and not no_db %}
                 <p class="login-hint mt-3 text-center">
                     <a href="{{ url_for('auth.login') }}">Log in</a> or
                     <a href="{{ url_for('auth.register') }}">register</a>
@@ -60,8 +60,8 @@
             </div>
         </div>
 
-        <!-- Saved locations (only for logged-in users) -->
-        {% if g.user %}
+        <!-- Saved locations (only for logged-in users with DB enabled) -->
+        {% if g.user and not no_db %}
         <div class="col-lg-6">
             <div class="saved-card">
                 <h2 class="search-card-title">⭐ Saved Locations</h2>
