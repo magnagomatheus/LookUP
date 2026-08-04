@@ -10,6 +10,16 @@ from flaskr.db import get_db
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
+
+def login_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None:
+            return redirect(url_for('auth.login'))
+        return view(**kwargs)
+    return wrapped_view
+
+
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
     if request.method == 'POST':
@@ -22,16 +32,16 @@ def register():
 
         if not username:
             error = "Username is required."
+        elif not email:
+            error = "Email is required."
         elif not password:
             error = "Password is required."
         elif not cpassword:
             error = "Confirm your password is required."
-        elif not email:
-            error = "Email is required."
         elif password != cpassword:
-            error = "Password is different to Password confirmation!"
-        
-        if error is None and password == cpassword:
+            error = "Password is different from Password confirmation!"
+
+        if error is None:
             try:
                 db.execute(
                     "INSERT INTO User (name, email, password) VALUES (?, ?, ?)",
@@ -39,10 +49,10 @@ def register():
                 )
                 db.commit()
             except db.IntegrityError:
-                error = f"User {username} is already registered."
+                error = f"Email {email} is already registered."
             else:
                 return redirect(url_for("auth.login"))
-        
+
         flash(error)
 
     return render_template('auth/register.html')
@@ -50,21 +60,20 @@ def register():
 
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
-
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        db=get_db()
+        db = get_db()
         error = None
         user = db.execute(
             'SELECT * FROM User WHERE email = ?', (email,)
         ).fetchone()
 
         if user is None:
-            error = 'Incorrect username.'
+            error = 'Incorrect email or password.'
         elif not check_password_hash(user['password'], password):
-            error = 'Incorrect password.'
-        
+            error = 'Incorrect email or password.'
+
         if error is None:
             session.clear()
             session['user_id'] = user['id']
@@ -73,6 +82,7 @@ def login():
         flash(error)
 
     return render_template('auth/login.html')
+
 
 @bp.before_app_request
 def load_logged_in_user():
@@ -89,13 +99,4 @@ def load_logged_in_user():
 @bp.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('core'))
-
-    def login_required(view):
-        @functools.wraps(view)
-        def wrapped_view(**kwargs):
-            if g.user is None:
-                return redirect(url_for('auth.login'))
-            
-            return view(**kwargs)
-        return wrapped_view
+    return redirect(url_for('core.index'))

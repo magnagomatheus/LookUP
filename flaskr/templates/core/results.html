@@ -1,0 +1,225 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ location }} — Celestial Observer{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Header -->
+    <div class="results-header text-center mb-5">
+        <p class="results-subtitle">Astronomical Report for</p>
+        <h1 class="results-location">📍 {{ location }}</h1>
+        <p class="results-time">{{ now }}</p>
+
+        <!-- Save location button (only for logged-in users) -->
+        {% if g.user %}
+        <form action="{{ url_for('core.saveAddress') }}" method="POST" class="mt-3 d-inline">
+            <input type="hidden" name="country" value="{{ country }}">
+            <input type="hidden" name="state"   value="{{ state }}">
+            <input type="hidden" name="city"     value="{{ city }}">
+            <input type="hidden" name="lat"      value="{{ lat }}">
+            <input type="hidden" name="lon"      value="{{ lon }}">
+            <input type="hidden" name="label"    value="{{ location }}">
+            <button type="submit" class="btn btn-outline-accent btn-sm">
+                ☆ Save this location
+            </button>
+        </form>
+        {% endif %}
+
+        <a href="{{ url_for('core.index') }}" class="btn btn-outline-secondary btn-sm ms-2">
+            ← New search
+        </a>
+    </div>
+
+    <!-- Flash messages -->
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    <!-- ===================== SKY CONDITIONS ===================== -->
+    <section class="mb-5">
+        <h2 class="section-title">🌤 Sky Conditions</h2>
+        <div class="sky-card">
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center mb-3 mb-md-0">
+                    <div class="observing-score-circle score-{{ sky.rating_class }}">
+                        <span class="score-number">{{ sky.observing_score }}</span>
+                        <span class="score-label">/ 100</span>
+                    </div>
+                    <p class="mt-2 fw-bold">
+                        <span class="badge bg-{{ sky.rating_class }} fs-6">{{ sky.rating }} for Observing</span>
+                    </p>
+                    <p class="sky-weather-desc">{{ sky.weather_description }}</p>
+                </div>
+                <div class="col-md-8">
+                    <div class="row g-3">
+                        <div class="col-6 col-md-4">
+                            <div class="sky-stat">
+                                <span class="sky-stat-icon">🌡</span>
+                                <span class="sky-stat-value">
+                                    {% if sky.temperature is not none %}{{ sky.temperature }}°C{% else %}—{% endif %}
+                                </span>
+                                <span class="sky-stat-label">Temperature</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="sky-stat">
+                                <span class="sky-stat-icon">☁️</span>
+                                <span class="sky-stat-value">
+                                    {% if sky.cloud_cover is not none %}{{ sky.cloud_cover }}%{% else %}—{% endif %}
+                                </span>
+                                <span class="sky-stat-label">Cloud Cover</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="sky-stat">
+                                <span class="sky-stat-icon">👁</span>
+                                <span class="sky-stat-value">
+                                    {% if sky.visibility_km is not none %}{{ sky.visibility_km }} km{% else %}—{% endif %}
+                                </span>
+                                <span class="sky-stat-label">Visibility</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="sky-stat">
+                                <span class="sky-stat-icon">💧</span>
+                                <span class="sky-stat-value">
+                                    {% if sky.humidity is not none %}{{ sky.humidity }}%{% else %}—{% endif %}
+                                </span>
+                                <span class="sky-stat-label">Humidity</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="sky-stat">
+                                <span class="sky-stat-icon">💨</span>
+                                <span class="sky-stat-value">
+                                    {% if sky.wind_speed is not none %}{{ sky.wind_speed }} km/h{% else %}—{% endif %}
+                                </span>
+                                <span class="sky-stat-label">Wind Speed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== MOON ===================== -->
+    <section class="mb-5">
+        <h2 class="section-title">{{ lunar.phase_emoji }} Moon</h2>
+        <div class="moon-card">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center mb-3 mb-md-0">
+                    <div class="moon-emoji-big">{{ lunar.phase_emoji }}</div>
+                    <p class="moon-phase-name">{{ lunar.phase_name }}</p>
+                    <div class="moon-phase-bar-wrap">
+                        <div class="moon-phase-bar" style="width: {{ lunar.phase_pct }}%"></div>
+                    </div>
+                    <p class="moon-phase-pct">{{ lunar.phase_pct }}% illuminated</p>
+                </div>
+                <div class="col-md-5 mb-3 mb-md-0">
+                    <ul class="moon-stats-list">
+                        <li>
+                            <span class="moon-stat-label">Position</span>
+                            <span class="moon-stat-value">{{ lunar.altitude }}° altitude · {{ lunar.cardinal }}</span>
+                        </li>
+                        <li>
+                            <span class="moon-stat-label">Rises</span>
+                            <span class="moon-stat-value">{{ lunar.rise }}</span>
+                        </li>
+                        <li>
+                            <span class="moon-stat-label">Sets</span>
+                            <span class="moon-stat-value">{{ lunar.set }}</span>
+                        </li>
+                        <li>
+                            <span class="moon-stat-label">Observing Impact</span>
+                            <span class="badge bg-{{ lunar.impact_class }}">{{ lunar.moon_impact }}</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <p class="moon-upcoming-title">Upcoming phases</p>
+                    <ul class="moon-upcoming-list">
+                        <li><span>🌑 New Moon</span><span>{{ lunar.next_new }}</span></li>
+                        <li><span>🌓 First Quarter</span><span>{{ lunar.next_first_q }}</span></li>
+                        <li><span>🌕 Full Moon</span><span>{{ lunar.next_full }}</span></li>
+                        <li><span>🌗 Last Quarter</span><span>{{ lunar.next_last_q }}</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== PLANETS ===================== -->
+    <section class="mb-5">
+        <h2 class="section-title">🪐 Planets Tonight</h2>
+        <div class="row g-3">
+            {% for planet in planets %}
+            <div class="col-sm-6 col-lg-4">
+                <div class="planet-card planet-{{ planet.vis_class }}">
+                    <div class="planet-card-header">
+                        <span class="planet-symbol">{{ planet.symbol }}</span>
+                        <span class="planet-name">{{ planet.name }}</span>
+                        <span class="badge bg-{{ planet.vis_class }} ms-auto">{{ planet.visibility }}</span>
+                    </div>
+                    <div class="planet-card-body">
+                        <div class="planet-stat-row">
+                            <span>Altitude</span>
+                            <span class="{% if planet.altitude > 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ planet.altitude }}°
+                            </span>
+                        </div>
+                        <div class="planet-stat-row">
+                            <span>Direction</span>
+                            <span>{{ planet.cardinal }} ({{ planet.azimuth }}°)</span>
+                        </div>
+                        <div class="planet-stat-row">
+                            <span>Magnitude</span>
+                            <span>{{ planet.magnitude }}</span>
+                        </div>
+                        <div class="planet-stat-row">
+                            <span>Constellation</span>
+                            <span>{{ planet.constellation }}</span>
+                        </div>
+                        <div class="planet-stat-row">
+                            <span>Rises / Sets</span>
+                            <span>{{ planet.rise }} / {{ planet.set }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <p class="hint-text mt-3">
+            * Magnitude: lower = brighter. Altitude above 15° is ideal for observation.
+        </p>
+    </section>
+
+    <!-- ===================== EVENTS ===================== -->
+    <section class="mb-5">
+        <h2 class="section-title">📅 Upcoming Astronomical Events</h2>
+        {% if events %}
+        <div class="row g-3">
+            {% for event in events %}
+            <div class="col-md-6">
+                <div class="event-card event-{{ event.type }}">
+                    <div class="event-icon">{{ event.icon }}</div>
+                    <div class="event-body">
+                        <p class="event-name">{{ event.name }}</p>
+                        <p class="event-date">{{ event.date }}</p>
+                        <p class="event-desc">{{ event.desc }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">No upcoming events calculated.</p>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

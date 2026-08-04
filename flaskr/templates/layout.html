@@ -3,37 +3,59 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-        <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
-
-        <title>{%block title%}{%endblock%}</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+              rel="stylesheet"
+              integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+              crossorigin="anonymous">
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <title>{% block title %}Celestial Observer{% endblock %}</title>
     </head>
     <body>
-        <nav id="navbar" class="navbar navbar-expand-lg navbar-light">
-            <div class="container-fluid d-flex justify-content-start gap-3">
-                <a class="nav-link" href="{{url_for('core.index')}}">Home</a>
+        <nav id="navbar" class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <!-- Brand -->
+                <a class="navbar-brand nav-brand" href="{{ url_for('core.index') }}">
+                    🌌 Celestial Observer
+                </a>
+
+                <!-- Toggler for mobile -->
+                <button class="navbar-toggler" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                        aria-controls="navbarContent" aria-expanded="false"
+                        aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+                        {% if g.user %}
+                            <li class="nav-item">
+                                <span class="navbar-text nav-username">
+                                    👤 {{ g.user['name'] }}
+                                </span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('auth.logout') }}">Log Out</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('auth.login') }}">Log In</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
             </div>
-            <div class="container-fluid d-flex justify-content-end align-items-center gap-3">
-                {% if g.user %}
-                    <span class="navbar-text fw-bold me-2">{{g.user['username']}}</span>
-                    <a class="nav-link" href="{{url_for('core.saveAddress')}}">Save New Address</a>
-                    <a class="nav-link" href="{{url_for('auth.logout')}}">Log Out</a>
-                {% else %}
-                    <a class="nav-link" href="{{url_for('auth.register')}}">Register</a>
-                    <a class="nav-link" href="{{url_for('auth.login')}}">Log In</a>
-                {%endif%}
-            </div>
-            
         </nav>
 
-        <section class="content">
-            {% for message in get_flashed_messages() %}
-                <div class="flash">{{ message }}</div>
-            {% endfor %}
-            
+        <main class="content">
             {% block content %}{% endblock %}
-        </section>
+        </main>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmF6P+T8JzTIjLBqBKNBpPdPpBn"
+                crossorigin="anonymous"></script>
     </body>
 </html>

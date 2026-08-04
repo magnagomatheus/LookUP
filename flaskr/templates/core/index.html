@@ -1,31 +1,128 @@
 {% extends "layout.html" %}
 
-{% block title%}Celest Objects Infos{%endblock%}
+{% block title %}Celestial Observer — Tonight's Sky{% endblock %}
 
-{%block content%}
+{% block content %}
+<div class="container py-5">
 
-    {% if g.user %}
-        <p>Hello, World!!!!</p>
-        gdsadsaaaaaaaaaaaaaaaaaaaaaa
-    {% else %}
-        <div class="container min-vh-100 d-flex flex-column justify-content-center text-center">
-            <h2 class="mb-5 fw-bold">Enter a address: </h2>
-            <form action="" method="POST">
-                <div class="mb-3">
-                    <label for="country" class="form-label">Country:</label>
-                    <input type="text" class="form-control mx-auto w-50" id="country" name="country">
-                </div>
-                <div class="mb-3">
-                    <label for="state" class="form-label">State:</label>
-                    <input type="text" class="form-control mx-auto w-50" id="state" name="state">
-                </div>
-                <div class="mb-3">
-                    <label for="city" class="form-label">City:</label>
-                    <input type="text" class="form-control mx-auto w-50" id="city" name="city">
-                </div>
-                <button type="submit" class="btn btn-primary mt-3">Submit</button>
-            </form>
+    <!-- Flash messages -->
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    {% endif %}
-    
-{%endblock%}
+    {% endfor %}
+
+    <!-- Hero -->
+    <div class="hero text-center mb-5">
+        <div class="hero-stars">✦ ✧ ✦</div>
+        <h1 class="hero-title">Celestial Observer</h1>
+        <p class="hero-subtitle">
+            Enter a location to get real-time astronomical data — planet visibility,
+            lunar phase, sky conditions and upcoming celestial events.
+        </p>
+    </div>
+
+    <div class="row justify-content-center g-5">
+
+        <!-- Search form (always visible) -->
+        <div class="{% if g.user and saved_locations %}col-lg-6{% else %}col-lg-8{% endif %}">
+            <div class="search-card">
+                <h2 class="search-card-title">🔭 Search a Location</h2>
+                <form action="{{ url_for('core.index') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="country" class="form-label">Country</label>
+                        <input type="text" class="form-control" id="country" name="country"
+                               placeholder="e.g. Brazil" autocomplete="country-name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="state" class="form-label">State / Province</label>
+                        <input type="text" class="form-control" id="state" name="state"
+                               placeholder="e.g. São Paulo" autocomplete="address-level1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="city" class="form-label">City</label>
+                        <input type="text" class="form-control" id="city" name="city"
+                               placeholder="e.g. Campinas" autocomplete="address-level2">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-2">
+                        ✨ Get Tonight's Sky
+                    </button>
+                </form>
+
+                {% if not g.user %}
+                <p class="login-hint mt-3 text-center">
+                    <a href="{{ url_for('auth.login') }}">Log in</a> or
+                    <a href="{{ url_for('auth.register') }}">register</a>
+                    to save your favourite locations.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Saved locations (only for logged-in users) -->
+        {% if g.user %}
+        <div class="col-lg-6">
+            <div class="saved-card">
+                <h2 class="search-card-title">⭐ Saved Locations</h2>
+
+                {% if saved_locations %}
+                <ul class="saved-list">
+                    {% for loc in saved_locations %}
+                    <li class="saved-item">
+                        <div class="saved-item-info">
+                            <span class="saved-item-label">{{ loc['label'] }}</span>
+                            <span class="saved-item-coords">
+                                {{ loc['latitude'] }}, {{ loc['longitude'] }}
+                            </span>
+                        </div>
+                        <div class="saved-item-actions">
+                            <a href="{{ url_for('core.lookupSaved', loc_id=loc['id']) }}"
+                               class="btn btn-sm btn-outline-info">View</a>
+                            <form action="{{ url_for('core.deleteAddress', loc_id=loc['id']) }}"
+                                  method="POST" class="d-inline"
+                                  onsubmit="return confirm('Remove {{ loc['label'] }}?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">✕</button>
+                            </form>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted text-center py-4">
+                    You have no saved locations yet.<br>
+                    Search for a location and save it for quick access!
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Feature highlights -->
+    <div class="row g-4 mt-5 text-center">
+        <div class="col-md-3">
+            <div class="feature-pill">🪐<br><strong>Planet Visibility</strong><br>
+                <small>Altitude, direction and rise/set times for all planets</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-pill">🌕<br><strong>Lunar Phase</strong><br>
+                <small>Current phase and upcoming moon events</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-pill">🌤<br><strong>Sky Conditions</strong><br>
+                <small>Cloud cover, visibility and observing score</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-pill">📅<br><strong>Celestial Events</strong><br>
+                <small>Solstices, equinoxes and planetary oppositions</small>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
