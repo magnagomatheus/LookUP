@@ -205,24 +205,31 @@ def lookupSaved(loc_id):
 
 
 # ---------------------------------------------------------------------------
-# Helper: Geocoding via Nominatim (free, no key)
+# Helper: Geocoding via OpenCage (free tier: 2500 req/day, no credit card)
 # ---------------------------------------------------------------------------
 
 def get_coordinates(country, state, city):
-    headers = {'User-Agent': 'CelestialObserver/1.0 (astronomical observation tool)'}
-    url = (
-        f"https://nominatim.openstreetmap.org/search"
-        f"?q={city},{state},{country}&format=json&limit=1"
-    )
+    api_key = os.environ.get('OPENCAGE_API_KEY', '')
+    if not api_key:
+        return None
+
+    query = f"{city},{state},{country}"
+    url = "https://api.opencagedata.com/geocode/v1/json"
+    params = {
+        'q': query,
+        'key': api_key,
+        'limit': 1,
+        'no_annotations': 1,
+    }
     try:
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
+        response = requests.get(url, params=params, timeout=10)
         data = response.json()
-        if data:
-            return (data[0]['lat'], data[0]['lon'])
-    except Exception as e:
-        import sys
-        print(f"[get_coordinates ERROR] {e}", file=sys.stderr)
+        results = data.get('results', [])
+        if results:
+            geometry = results[0]['geometry']
+            return (str(geometry['lat']), str(geometry['lng']))
+    except Exception:
+        pass
     return None
 
 
