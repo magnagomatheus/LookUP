@@ -5,6 +5,7 @@ from flask import Flask
 # When NO_DB=true, the app runs without any database (search-only mode).
 NO_DB = os.environ.get('NO_DB', 'false').lower() == 'true'
 
+
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
@@ -28,11 +29,11 @@ def create_app(test_config=None):
     def inject_no_db():
         return {'no_db': NO_DB}
 
-    from . import auth
-    app.register_blueprint(auth.bp)
+    from .controllers.auth_controller import bp as auth_bp
+    app.register_blueprint(auth_bp)
 
-    from . import core
-    app.register_blueprint(core.bp)
+    from .controllers.core_controller import bp as core_bp
+    app.register_blueprint(core_bp)
     app.add_url_rule('/', endpoint='index')
 
     return app
