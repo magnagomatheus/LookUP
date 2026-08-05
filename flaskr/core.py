@@ -209,7 +209,8 @@ def lookupSaved(loc_id):
 # ---------------------------------------------------------------------------
 
 def get_coordinates(country, state, city):
-    headers = {'User-Agent': 'CelestialObserver/1.0 (cs50project)'}
+    contact = os.environ.get('CONTACT_EMAIL', 'celestialobserver@example.com')
+    headers = {'User-Agent': f'CelestialObserver/1.0 (contact: {contact})'}
     url = (
         f"https://nominatim.openstreetmap.org/search"
         f"?q={city},{state},{country}&format=json&limit=1"
