@@ -220,8 +220,9 @@ def get_coordinates(country, state, city):
         data = response.json()
         if data:
             return (data[0]['lat'], data[0]['lon'])
-    except Exception:
-        pass
+    except Exception as e:
+        import sys
+        print(f"[get_coordinates ERROR] {e}", file=sys.stderr)
     return None
 
 
